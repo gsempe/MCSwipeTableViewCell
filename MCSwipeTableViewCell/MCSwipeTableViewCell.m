@@ -108,7 +108,8 @@ secondStateIconName:(NSString *)secondIconName
       thirdIconName:(NSString *)thirdIconName
          thirdColor:(UIColor *)thirdColor
      fourthIconName:(NSString *)fourthIconName
-        fourthColor:(UIColor *)fourthColor {
+        fourthColor:(UIColor *)fourthColor
+          noneColor:(UIColor *)noneColor {
     self = [self initWithStyle:style reuseIdentifier:reuseIdentifier];
 
     if (self) {
@@ -119,7 +120,8 @@ secondStateIconName:(NSString *)secondIconName
                       thirdIconName:thirdIconName
                          thirdColor:thirdColor
                      fourthIconName:fourthIconName
-                        fourthColor:fourthColor];
+                        fourthColor:fourthColor
+                          noneColor:noneColor];
     }
 
     return self;
@@ -266,7 +268,7 @@ secondStateIconName:(NSString *)secondIconName
     else if (percentage <= -kMCStop2)
         color = _fourthColor;
     else
-        color = [UIColor clearColor];
+        color = _noneColor;
 
     return color;
 }
@@ -494,7 +496,8 @@ secondStateIconName:(NSString *)secondIconName
                 thirdIconName:(NSString *)thirdIconName
                    thirdColor:(UIColor *)thirdColor
                fourthIconName:(NSString *)fourthIconName
-                  fourthColor:(UIColor *)fourthColor {
+                  fourthColor:(UIColor *)fourthColor
+                    noneColor:(UIColor *)noneColor {
     [self setFirstIconName:firstIconName];
     [self setSecondIconName:secondIconName];
     [self setThirdIconName:thirdIconName];
@@ -504,6 +507,7 @@ secondStateIconName:(NSString *)secondIconName
     [self setSecondColor:secondColor];
     [self setThirdColor:thirdColor];
     [self setFourthColor:fourthColor];
+    [self setNoneColor:noneColor];
 }
 
 @end

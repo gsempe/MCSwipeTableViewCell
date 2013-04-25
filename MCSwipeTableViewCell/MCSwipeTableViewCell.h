@@ -49,6 +49,7 @@ typedef NS_ENUM(NSUInteger, MCSwipeTableViewCellMode){
 @property(nonatomic, strong) UIColor *secondColor;
 @property(nonatomic, strong) UIColor *thirdColor;
 @property(nonatomic, strong) UIColor *fourthColor;
+@property(nonatomic, strong) UIColor *noneColor;
 
 @property(nonatomic, assign) MCSwipeTableViewCellMode mode;
 
@@ -61,7 +62,8 @@ secondStateIconName:(NSString *)secondIconName
       thirdIconName:(NSString *)thirdIconName
          thirdColor:(UIColor *)thirdColor
      fourthIconName:(NSString *)fourthIconName
-        fourthColor:(UIColor *)fourthColor;
+        fourthColor:(UIColor *)fourthColor
+          noneColor:(UIColor *)noneColor;
 
 - (void)setFirstStateIconName:(NSString *)firstIconName
                    firstColor:(UIColor *)firstColor
@@ -70,6 +72,7 @@ secondStateIconName:(NSString *)secondIconName
                 thirdIconName:(NSString *)thirdIconName
                    thirdColor:(UIColor *)thirdColor
                fourthIconName:(NSString *)fourthIconName
-                  fourthColor:(UIColor *)fourthColor;
+                  fourthColor:(UIColor *)fourthColor
+                    noneColor:(UIColor *)noneColor;
 
 @end
