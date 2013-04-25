@@ -6,6 +6,8 @@
 //  Copyright (c) 2013 Mad Castle. All rights reserved.
 //
 
+#import "ABTableViewCell.h"
+
 @class MCSwipeTableViewCell;
 
 typedef NS_ENUM(NSUInteger, MCSwipeTableViewCellState){
@@ -34,7 +36,7 @@ typedef NS_ENUM(NSUInteger, MCSwipeTableViewCellMode){
 
 @end
 
-@interface MCSwipeTableViewCell : UITableViewCell
+@interface MCSwipeTableViewCell : ABTableViewCell
 
 @property(nonatomic, assign) id <MCSwipeTableViewCellDelegate> delegate;
 

@@ -131,7 +131,7 @@ secondStateIconName:(NSString *)secondIconName
     _colorIndicatorView = [[UIView alloc] initWithFrame:self.bounds];
     [_colorIndicatorView setAutoresizingMask:UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleWidth];
     [_colorIndicatorView setBackgroundColor:[UIColor clearColor]];
-    [self insertSubview:_colorIndicatorView belowSubview:self.contentView];
+    [self insertSubview:_colorIndicatorView belowSubview:self.backgroundView];
 
     _slidingImageView = [[UIImageView alloc] init];
     [_slidingImageView setContentMode:UIViewContentModeCenter];
@@ -148,16 +148,16 @@ secondStateIconName:(NSString *)secondIconName
     UIGestureRecognizerState state = [gesture state];
     CGPoint translation = [gesture translationInView:self];
     CGPoint velocity = [gesture velocityInView:self];
-    CGFloat percentage = [self percentageWithOffset:CGRectGetMinX(self.contentView.frame) relativeToWidth:CGRectGetWidth(self.bounds)];
+    CGFloat percentage = [self percentageWithOffset:CGRectGetMinX(self.backgroundView.frame) relativeToWidth:CGRectGetWidth(self.bounds)];
     NSTimeInterval animationDuration = [self animationDurationWithVelocity:velocity];
     _direction = [self directionWithPercentage:percentage];
 
     if (state == UIGestureRecognizerStateBegan) {
     }
     else if (state == UIGestureRecognizerStateBegan || state == UIGestureRecognizerStateChanged) {
-        CGPoint center = {self.contentView.center.x + translation.x, self.contentView.center.y};
-        [self.contentView setCenter:center];
-        [self animateWithOffset:CGRectGetMinX(self.contentView.frame)];
+        CGPoint center = {self.backgroundView.center.x + translation.x, self.backgroundView.center.y};
+        [self.backgroundView setCenter:center];
+        [self animateWithOffset:CGRectGetMinX(self.backgroundView.frame)];
         [gesture setTranslation:CGPointZero inView:self];
     }
     else if (state == UIGestureRecognizerStateEnded || state == UIGestureRecognizerStateCancelled) {
@@ -349,6 +349,7 @@ secondStateIconName:(NSString *)secondIconName
     // Color
     UIColor *color = [self colorWithPercentage:percentage];
     if (color != nil) {
+        [self sendSubviewToBack:_colorIndicatorView];
         [_colorIndicatorView setBackgroundColor:color];
     }
 }
@@ -411,12 +412,13 @@ secondStateIconName:(NSString *)secondIconName
         origin = CGRectGetWidth(self.bounds);
 
     CGFloat percentage = [self percentageWithOffset:origin relativeToWidth:CGRectGetWidth(self.bounds)];
-    CGRect rect = self.contentView.frame;
+    CGRect rect = self.backgroundView.frame;
     rect.origin.x = origin;
 
     // Color
     UIColor *color = [self colorWithPercentage:_currentPercentage];
     if (color != nil) {
+        [self sendSubviewToBack:_colorIndicatorView];
         [_colorIndicatorView setBackgroundColor:color];
     }
 
@@ -429,11 +431,13 @@ secondStateIconName:(NSString *)secondIconName
                           delay:0.0
                         options:(UIViewAnimationOptionCurveEaseOut | UIViewAnimationOptionAllowUserInteraction)
                      animations:^{
-                         [self.contentView setFrame:rect];
+                         [self.backgroundView setFrame:rect];
                          [_slidingImageView setAlpha:0];
                          [self slideImageWithPercentage:percentage imageName:_currentImageName isDragging:NO];
                      }
                      completion:^(BOOL finished) {
+                         [self sendSubviewToBack:_colorIndicatorView];
+                         [_colorIndicatorView setBackgroundColor:[UIColor clearColor]];
                          [self notifyDelegate];
                      }];
 }
@@ -445,9 +449,9 @@ secondStateIconName:(NSString *)secondIconName
                           delay:0
                         options:(UIViewAnimationOptionCurveEaseOut)
                      animations:^{
-                         CGRect frame = self.contentView.frame;
+                         CGRect frame = self.backgroundView.frame;
                          frame.origin.x = -bounceDistance;
-                         [self.contentView setFrame:frame];
+                         [self.backgroundView setFrame:frame];
                          [_slidingImageView setAlpha:0.0];
                          [self slideImageWithPercentage:0 imageName:_currentImageName isDragging:NO];
                      }
@@ -457,11 +461,13 @@ secondStateIconName:(NSString *)secondIconName
                                                delay:0
                                              options:UIViewAnimationOptionCurveEaseIn
                                           animations:^{
-                                              CGRect frame = self.contentView.frame;
+                                              CGRect frame = self.backgroundView.frame;
                                               frame.origin.x = 0;
-                                              [self.contentView setFrame:frame];
+                                              [self.backgroundView setFrame:frame];
                                           }
                                           completion:^(BOOL finished2) {
+                                              [self sendSubviewToBack:_colorIndicatorView];
+                                              [_colorIndicatorView setBackgroundColor:[UIColor clearColor]];
                                               [self notifyDelegate];
                                           }];
                      }];
