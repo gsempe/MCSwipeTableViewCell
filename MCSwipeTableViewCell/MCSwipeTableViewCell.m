@@ -129,6 +129,10 @@ secondStateIconName:(NSString *)secondIconName
 
 - (void)initializer {
     _mode = MCSwipeTableViewCellModeSwitch;
+    _firstStateMode = MCSwipeTableViewCellModeNone;
+    _secondStateMode = MCSwipeTableViewCellModeNone;
+    _thirdStateMode = MCSwipeTableViewCellModeNone;
+    _fourthStateMode = MCSwipeTableViewCellModeNone;
 
     _colorIndicatorView = [[UIView alloc] initWithFrame:self.bounds];
     [_colorIndicatorView setAutoresizingMask:UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleWidth];
@@ -166,8 +170,9 @@ secondStateIconName:(NSString *)secondIconName
         _currentImageName = [self imageNameWithPercentage:percentage];
         _currentPercentage = percentage;
         MCSwipeTableViewCellState cellState= [self stateWithPercentage:percentage];
+        MCSwipeTableViewCellMode mode = [self modeForState:cellState];
 
-        if (_mode == MCSwipeTableViewCellModeExit && _direction != MCSwipeTableViewCellDirectionCenter && [self validateState:cellState])
+        if (mode == MCSwipeTableViewCellModeExit && _direction != MCSwipeTableViewCellDirectionCenter && [self validateState:cellState])
             [self moveWithDuration:animationDuration andDirection:_direction];
         else
             [self bounceToOrigin];
@@ -291,6 +296,48 @@ secondStateIconName:(NSString *)secondIconName
         state = MCSwipeTableViewCellState4;
 
     return state;
+}
+
+- (MCSwipeTableViewCellMode)modeForState:(MCSwipeTableViewCellState)state {
+
+    MCSwipeTableViewCellMode mode = MCSwipeTableViewCellModeNone;
+    switch (state) {
+        case MCSwipeTableViewCellStateNone:
+            mode = _mode;
+            break;
+        case MCSwipeTableViewCellState1:
+            if (MCSwipeTableViewCellModeNone==_firstStateMode) {
+                mode = _mode;
+            } else {
+                mode = _firstStateMode;
+            }
+            break;
+        case MCSwipeTableViewCellState2:
+            if (MCSwipeTableViewCellModeNone==_secondStateMode) {
+                mode = _mode;
+            } else {
+                mode = _secondStateMode;
+            }
+            break;
+        case MCSwipeTableViewCellState3:
+            if (MCSwipeTableViewCellModeNone==_thirdStateMode) {
+                mode = _mode;
+            } else {
+                mode = _firstStateMode;
+            }
+            break;
+        case MCSwipeTableViewCellState4:
+            if (MCSwipeTableViewCellModeNone==_fourthStateMode) {
+                mode = _mode;
+            } else {
+                mode = _fourthStateMode;
+            }
+            break;
+        default:
+            mode = _mode;
+            break;
+    }
+    return mode;
 }
 
 - (BOOL)validateState:(MCSwipeTableViewCellState)state {
@@ -481,8 +528,9 @@ secondStateIconName:(NSString *)secondIconName
     MCSwipeTableViewCellState state = [self stateWithPercentage:_currentPercentage];
 
     if (state != MCSwipeTableViewCellStateNone) {
+        MCSwipeTableViewCellMode mode = [self modeForState:state];
         if (_delegate != nil && [_delegate respondsToSelector:@selector(swipeTableViewCell:didTriggerState:withMode:)]) {
-            [_delegate swipeTableViewCell:self didTriggerState:state withMode:_mode];
+            [_delegate swipeTableViewCell:self didTriggerState:state withMode:mode];
         }
     }
 }
