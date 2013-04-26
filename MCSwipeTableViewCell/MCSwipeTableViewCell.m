@@ -419,14 +419,14 @@ secondStateIconName:(NSString *)secondIconName
         }
 
         else if (percentage >= kMCStop1) {
-            position.x = [self offsetWithPercentage:percentage - (kMCStop1 / 2) relativeToWidth:CGRectGetWidth(self.bounds)];
+            position.x = [self offsetWithPercentage:percentage/2 relativeToWidth:CGRectGetWidth(self.bounds)];
         }
         else if (percentage < 0 && percentage >= -kMCStop1) {
             position.x = CGRectGetWidth(self.bounds) - [self offsetWithPercentage:(kMCStop1 / 2) relativeToWidth:CGRectGetWidth(self.bounds)];
         }
 
         else if (percentage < -kMCStop1) {
-            position.x = CGRectGetWidth(self.bounds) + [self offsetWithPercentage:percentage + (kMCStop1 / 2) relativeToWidth:CGRectGetWidth(self.bounds)];
+            position.x = CGRectGetWidth(self.bounds) + [self offsetWithPercentage:percentage/2 relativeToWidth:CGRectGetWidth(self.bounds)];
         }
     }
     else {
