@@ -128,7 +128,7 @@ secondStateIconName:(NSString *)secondIconName
 }
 
 - (void)initializer {
-    _mode = MCSwipeTableViewCellModeSwitch;
+    _mode = MCSwipeTableViewCellModeNone;
     _firstStateMode = MCSwipeTableViewCellModeNone;
     _secondStateMode = MCSwipeTableViewCellModeNone;
     _thirdStateMode = MCSwipeTableViewCellModeNone;
@@ -182,6 +182,13 @@ secondStateIconName:(NSString *)secondIconName
 #pragma mark - UIGestureRecognizerDelegate
 
 - (BOOL)gestureRecognizerShouldBegin:(UIGestureRecognizer *)gestureRecognizer {
+    if ((MCSwipeTableViewCellModeNone==self.firstStateMode) &&
+        (MCSwipeTableViewCellModeNone==self.secondStateMode) &&
+        (MCSwipeTableViewCellModeNone==self.thirdStateMode) &&
+        (MCSwipeTableViewCellModeNone==self.fourthStateMode) &&
+        ((MCSwipeTableViewCellModeNone==self.mode))) {
+        return NO;
+    }
     if (gestureRecognizer == _panGestureRecognizer) {
         UIScrollView *superview = (UIScrollView *) self.superview;
         CGPoint translation = [(UIPanGestureRecognizer *) gestureRecognizer translationInView:superview];
