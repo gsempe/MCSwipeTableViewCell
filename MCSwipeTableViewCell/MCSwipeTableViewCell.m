@@ -9,7 +9,7 @@
 #import "MCSwipeTableViewCell.h"
 
 static CGFloat const kMCStop1 = 0.20; // Percentage limit to trigger the first action
-static CGFloat const kMCStop2 = 0.75; // Percentage limit to trigger the second action
+static CGFloat const kMCStop2 = 0.40; // Percentage limit to trigger the second action
 static CGFloat const kMCBounceAmplitude = 20.0; // Maximum bounce amplitude when using the MCSwipeTableViewCellModeSwitch mode
 static NSTimeInterval const kMCBounceDuration1 = 0.2; // Duration of the first part of the bounce animation
 static NSTimeInterval const kMCBounceDuration2 = 0.1; // Duration of the second part of the bounce animation
@@ -60,6 +60,7 @@ static NSTimeInterval const kMCDurationHightLimit = 0.1; // Highest duration whe
 
 @property(nonatomic, strong) UIPanGestureRecognizer *panGestureRecognizer;
 @property(nonatomic, strong) UIImageView *slidingImageView;
+@property(nonatomic, strong) UILabel *slidingLabel;
 @property(nonatomic, strong) NSString *currentImageName;
 @property(nonatomic, strong) UIView *colorIndicatorView;
 
@@ -133,6 +134,9 @@ secondStateIconName:(NSString *)secondIconName
     _secondStateMode = MCSwipeTableViewCellModeNone;
     _thirdStateMode = MCSwipeTableViewCellModeNone;
     _fourthStateMode = MCSwipeTableViewCellModeNone;
+    
+    _shouldCenterIcon = YES;
+    _shouldShowOnlyText = NO;
 
     _colorIndicatorView = [[UIView alloc] initWithFrame:self.bounds];
     [_colorIndicatorView setAutoresizingMask:UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleWidth];
@@ -142,6 +146,8 @@ secondStateIconName:(NSString *)secondIconName
     _slidingImageView = [[UIImageView alloc] init];
     [_slidingImageView setContentMode:UIViewContentModeCenter];
     [_colorIndicatorView addSubview:_slidingImageView];
+    _slidingLabel = [[UILabel alloc] init];
+    [_colorIndicatorView addSubview:_slidingLabel];
 
     _panGestureRecognizer = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(handlePanGestureRecognizer:)];
     [self addGestureRecognizer:_panGestureRecognizer];
@@ -155,6 +161,7 @@ secondStateIconName:(NSString *)secondIconName
     CGPoint translation = [gesture translationInView:self];
     CGPoint velocity = [gesture velocityInView:self];
     CGFloat percentage = [self percentageWithOffset:CGRectGetMinX(self.backgroundView.frame) relativeToWidth:CGRectGetWidth(self.bounds)];
+    DLog(@"percentage %f", percentage);
     NSTimeInterval animationDuration = [self animationDurationWithVelocity:velocity];
     _direction = [self directionWithPercentage:percentage];
 
@@ -330,7 +337,7 @@ secondStateIconName:(NSString *)secondIconName
             if (MCSwipeTableViewCellModeNone==_thirdStateMode) {
                 mode = _mode;
             } else {
-                mode = _firstStateMode;
+                mode = _thirdStateMode;
             }
             break;
         case MCSwipeTableViewCellState4:
@@ -396,9 +403,18 @@ secondStateIconName:(NSString *)secondIconName
     NSString *imageName = [self imageNameWithPercentage:percentage];
 
     // Image Position
-    if (imageName != nil) {
-        [_slidingImageView setImage:[UIImage imageNamed:imageName]];
-        [_slidingImageView setAlpha:[self imageAlphaWithPercentage:percentage]];
+    if (NO==self.shouldShowOnlyText) {
+        if (imageName != nil) {
+            [_slidingImageView setImage:[UIImage imageNamed:imageName]];
+            [_slidingImageView setAlpha:[self imageAlphaWithPercentage:percentage]];
+        }
+    }
+    if (YES==self.shouldShowOnlyText) {
+        if (imageName!=nil) {
+            [_slidingLabel setText:imageName];
+            [_slidingLabel sizeToFit];
+            [_slidingLabel setAlpha:[self imageAlphaWithPercentage:percentage]];
+        }
     }
     [self slideImageWithPercentage:percentage imageName:imageName isDragging:YES];
 
@@ -412,9 +428,18 @@ secondStateIconName:(NSString *)secondIconName
 
 
 - (void)slideImageWithPercentage:(CGFloat)percentage imageName:(NSString *)imageName isDragging:(BOOL)isDragging {
-    UIImage *slidingImage = [UIImage imageNamed:imageName];
-    CGSize slidingImageSize = slidingImage.size;
+    
+    UIImage *slidingImage;
+    CGSize slidingImageSize;
     CGRect slidingImageRect;
+
+    if (NO==self.shouldShowOnlyText) {
+        slidingImage = [UIImage imageNamed:imageName];
+        slidingImageSize = slidingImage.size;
+    }
+    if (YES==self.shouldShowOnlyText) {
+        slidingImageSize = _slidingLabel.frame.size;
+    }
 
     CGPoint position = CGPointZero;
 
@@ -426,14 +451,22 @@ secondStateIconName:(NSString *)secondIconName
         }
 
         else if (percentage >= kMCStop1) {
-            position.x = [self offsetWithPercentage:percentage/2 relativeToWidth:CGRectGetWidth(self.bounds)];
+            if (YES==self.doCenterIcon) {
+                position.x = [self offsetWithPercentage:percentage/2 relativeToWidth:CGRectGetWidth(self.bounds)];
+            } else {
+                position.x = [self offsetWithPercentage:percentage - (kMCStop1 / 2) relativeToWidth:CGRectGetWidth(self.bounds)];
+            }
         }
         else if (percentage < 0 && percentage >= -kMCStop1) {
             position.x = CGRectGetWidth(self.bounds) - [self offsetWithPercentage:(kMCStop1 / 2) relativeToWidth:CGRectGetWidth(self.bounds)];
         }
 
         else if (percentage < -kMCStop1) {
-            position.x = CGRectGetWidth(self.bounds) + [self offsetWithPercentage:percentage/2 relativeToWidth:CGRectGetWidth(self.bounds)];
+            if (YES==self.doCenterIcon) {
+                position.x = CGRectGetWidth(self.bounds) + [self offsetWithPercentage:percentage/2 relativeToWidth:CGRectGetWidth(self.bounds)];
+            } else {
+                position.x = CGRectGetWidth(self.bounds) + [self offsetWithPercentage:percentage + (kMCStop1 / 2) relativeToWidth:CGRectGetWidth(self.bounds)];
+            }
         }
     }
     else {
@@ -450,12 +483,17 @@ secondStateIconName:(NSString *)secondIconName
 
 
     slidingImageRect = CGRectMake(position.x - slidingImageSize.width / 2.0,
-            position.y - slidingImageSize.height / 2.0,
-            slidingImageSize.width,
-            slidingImageSize.height);
-
+                                  position.y - slidingImageSize.height / 2.0,
+                                  slidingImageSize.width,
+                                  slidingImageSize.height);
+    
     slidingImageRect = CGRectIntegral(slidingImageRect);
-    [_slidingImageView setFrame:slidingImageRect];
+    if (NO==self.shouldShowOnlyText) {
+        [_slidingImageView setFrame:slidingImageRect];
+    }
+    if (YES==self.shouldShowOnlyText) {
+        [_slidingLabel setFrame:slidingImageRect];
+    }
 }
 
 

@@ -58,6 +58,9 @@ typedef NS_ENUM(NSUInteger, MCSwipeTableViewCellMode){
 @property(nonatomic, assign) MCSwipeTableViewCellMode thirdStateMode;
 @property(nonatomic, assign) MCSwipeTableViewCellMode fourthStateMode;
 
+@property(nonatomic, assign, getter = doCenterIcon) BOOL shouldCenterIcon;
+@property(nonatomic, assign, getter = showOnlyText) BOOL shouldShowOnlyText;
+
 - (id)initWithStyle:(UITableViewCellStyle)style
     reuseIdentifier:(NSString *)reuseIdentifier
  firstStateIconName:(NSString *)firstIconName
