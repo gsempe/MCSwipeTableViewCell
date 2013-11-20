@@ -161,7 +161,6 @@ secondStateIconName:(NSString *)secondIconName
     CGPoint translation = [gesture translationInView:self];
     CGPoint velocity = [gesture velocityInView:self];
     CGFloat percentage = [self percentageWithOffset:CGRectGetMinX(self.backgroundView.frame) relativeToWidth:CGRectGetWidth(self.bounds)];
-    DLog(@"percentage %f", percentage);
     NSTimeInterval animationDuration = [self animationDurationWithVelocity:velocity];
     _direction = [self directionWithPercentage:percentage];
 
@@ -200,6 +199,26 @@ secondStateIconName:(NSString *)secondIconName
         UIScrollView *superview = (UIScrollView *) self.superview;
         CGPoint translation = [(UIPanGestureRecognizer *) gestureRecognizer translationInView:superview];
 
+        // Make sure that the way translation is, there is state
+        // if mode is different of MCSwipeTableViewCellModeNone
+        if ((MCSwipeTableViewCellModeNone==self.mode)) {
+            if (0<translation.x) {
+                // pan from left to right
+                if ((MCSwipeTableViewCellModeNone==self.firstStateMode) &&
+                    (MCSwipeTableViewCellModeNone==self.secondStateMode)) {
+                    // No state this way, stop here
+                    return NO;
+                }
+            }
+            if (0>translation.x) {
+                // pan from right to left
+                if ((MCSwipeTableViewCellModeNone==self.thirdStateMode) &&
+                    (MCSwipeTableViewCellModeNone==self.fourthStateMode)) {
+                    // No state this way, stop here
+                    return NO;
+                }
+            }
+        }
         // Make sure it is scrolling horizontally
         return ((fabs(translation.x) / fabs(translation.y) > 1) ? YES : NO && (superview.contentOffset.y == 0.0 && superview.contentOffset.x == 0.0));
     }
@@ -407,6 +426,8 @@ secondStateIconName:(NSString *)secondIconName
         if (imageName != nil) {
             [_slidingImageView setImage:[UIImage imageNamed:imageName]];
             [_slidingImageView setAlpha:[self imageAlphaWithPercentage:percentage]];
+        } else {
+            [_slidingImageView setAlpha:0.0];
         }
     }
     if (YES==self.shouldShowOnlyText) {
@@ -414,6 +435,8 @@ secondStateIconName:(NSString *)secondIconName
             [_slidingLabel setText:imageName];
             [_slidingLabel sizeToFit];
             [_slidingLabel setAlpha:[self imageAlphaWithPercentage:percentage]];
+        } else {
+            [_slidingLabel setAlpha:0.0];
         }
     }
     [self slideImageWithPercentage:percentage imageName:imageName isDragging:YES];
